@@ -26,6 +26,7 @@ async function run() {
         const collection = client.db("fruitbase").collection("fruits");
 
         // get data from database
+
         app.get("/items", async (req, res) => {
             const query = {};
             const cursor = collection.find(query);
@@ -63,7 +64,7 @@ async function run() {
             res.send(result);
         });
 
-        // delete a specific data from server
+        // delete a specific data from database
 
         app.delete("/item/:id", async (req, res) => {
             const id = req.params.id;
@@ -74,11 +75,10 @@ async function run() {
             res.send(result);
         });
 
-        // data post to server
+        // data post to database
 
         app.post("/item", async (req, res) => {
             const item = req.body;
-            console.log(item);
 
             const result = await collection.insertOne(item);
         });
