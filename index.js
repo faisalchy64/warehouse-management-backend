@@ -73,6 +73,15 @@ async function run() {
 
             res.send(result);
         });
+
+        // data post to server
+
+        app.post("/item", async (req, res) => {
+            const item = req.body;
+            console.log(item);
+
+            const result = await collection.insertOne(item);
+        });
     } finally {
         // await client.close();
     }
