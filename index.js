@@ -34,6 +34,20 @@ async function run() {
             res.send(result);
         });
 
+        // get specific user data
+
+        app.get("/myitems", async (req, res) => {
+            const email = req.query.email;
+            console.log(query);
+            const cursor = collection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+        // auth
+
+        app.get("/login", async (req, res) => {});
+
         // get specific data from database
         app.get("/item/:id", async (req, res) => {
             const id = req.params.id;
