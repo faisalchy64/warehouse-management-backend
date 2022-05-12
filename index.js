@@ -35,9 +35,8 @@ function verifyJWT(req, res, next) {
         }
 
         req.decoded = decoded;
+        next();
     });
-
-    next();
 }
 
 async function run() {
@@ -66,8 +65,6 @@ async function run() {
                 const cursor = collection.find(query);
                 const result = await cursor.toArray();
                 res.send(result);
-            } else {
-                res.status(403).send({ message: "forbidden access" });
             }
         });
 
