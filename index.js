@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
@@ -19,6 +20,26 @@ const client = new MongoClient(uri, {
     serverApi: ServerApiVersion.v1,
 });
 
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+        return res.status(401).send({ message: "unauthorized access" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+        if (err) {
+            res.status(403).send({ message: "forbidden access" });
+        }
+
+        req.decoded = decoded;
+    });
+
+    next();
+}
+
 async function run() {
     try {
         await client.connect();
@@ -36,17 +57,30 @@ async function run() {
 
         // get specific user data
 
-        app.get("/myitems", async (req, res) => {
+        app.get("/myitems", verifyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            const query = { email };
-            const cursor = collection.find(query);
-            const result = await cursor.toArray();
-            res.send(result);
+
+            if (decodedEmail === email) {
+                const query = { email };
+                const cursor = collection.find(query);
+                const result = await cursor.toArray();
+                res.send(result);
+            } else {
+                res.status(403).send({ message: "forbidden access" });
+            }
         });
 
         // auth
 
-        app.get("/login", async (req, res) => {});
+        app.post("/login", async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
+                expiresIn: "1d",
+            });
+
+            res.send(accessToken);
+        });
 
         // get specific data from database
         app.get("/item/:id", async (req, res) => {
